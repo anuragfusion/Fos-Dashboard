@@ -39,6 +39,9 @@ export function normalize(d: DashboardData): DashboardData {
     clients: {
       ...d.clients,
       summary: (d.clients?.summary ?? []).map((s) => ({ ...s, n: n(s.n), fte: n(s.fte) })),
+      silence: d.clients?.silence
+        ? d.clients.silence.map((s) => ({ ...s, n: n(s.n), fte: n(s.fte) }))
+        : undefined,
       rows: (d.clients?.rows ?? []).map((r) => ({
         ...r,
         fte: n(r.fte),

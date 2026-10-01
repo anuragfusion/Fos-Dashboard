@@ -18,9 +18,40 @@ function vClass(kind: string): string {
 
 interface Bucket { n: number; fte: number; biggest?: C | null }
 
-/** Split silent rows by silence_reason. Returns null when the field is unpopulated across the board. */
-function silenceBuckets(rows: C[]): Record<SilenceReason, Bucket> | null {
+/**
+ * Split silent clients by silence_reason.
+ *
+ * Prefers the `silence` array the API computes straight from the view, because `rows` can be
+ * filtered or paged and would then undercount. Falls back to counting rows. Returns null only
+ * when neither source carries silence_reason — i.e. the API is still on the pre-v2 SELECT, in
+ * which case the caller renders LegacyNoReports.
+ */
+function silenceBuckets(
+  rows: C[],
+  summary?: { reason: SilenceReason; n: number; fte: number }[],
+): Record<SilenceReason, Bucket> | null {
   const silent = rows.filter((r) => r.state === 'silent');
+
+  if (summary?.length) {
+    const base: Record<SilenceReason, Bucket> = {
+      no_activity_logged: { n: 0, fte: 0, biggest: null },
+      team_dark: { n: 0, fte: 0, biggest: null },
+      went_quiet: { n: 0, fte: 0, biggest: null },
+    };
+    for (const s of summary) {
+      if (!base[s.reason]) continue;
+      base[s.reason].n = s.n;
+      base[s.reason].fte = s.fte;
+    }
+    // `biggest` is only ever used for the team_dark callout, so take it from whatever rows we have.
+    for (const r of silent) {
+      if (!r.silence_reason) continue;
+      const b = base[r.silence_reason];
+      if (b && (!b.biggest || r.fte > b.biggest.fte)) b.biggest = r;
+    }
+    return base;
+  }
+
   if (!silent.length) return null;
   const populated = silent.some((r) => r.silence_reason != null);
   if (!populated) return null;
@@ -49,7 +80,10 @@ export function ClientsScreen() {
   const { data } = useDash();
   if (!data) return null;
 
+  // rows now carries every ERP company, including the never-named ones (last_mention null) that
+  // the silence tiles count. The named-client tabs below filter them back out.
   const rows = data.clients.rows;
+  const named = rows.filter((r) => r.last_mention != null);
   const summary = data.clients.summary;
   const alias = data.clients.alias;
   const money = data.money;
@@ -57,9 +91,9 @@ export function ClientsScreen() {
   const sumOf = (s: ClientStateOrNoReports) =>
     summary.find((r) => r.state === s) ?? { state: s, n: 0, fte: 0 };
 
-  const atRisk = rows.filter((r) => r.state === 'at_risk');
-  const watch = rows.filter((r) => r.state === 'watch');
-  const buckets = silenceBuckets(rows);
+  const atRisk = named.filter((r) => r.state === 'at_risk');
+  const watch = named.filter((r) => r.state === 'watch');
+  const buckets = silenceBuckets(rows, data.clients.silence);
   const nr = sumOf('no_reports'); // legacy fallback until silence_reason populates
 
   const h1 = atRisk.length
@@ -112,13 +146,13 @@ export function ClientsScreen() {
 
       {tab === 'attention' && (
         <ClientTable
-          rows={rows.filter(
+          rows={named.filter(
             (r) => r.state === 'at_risk' || r.state === 'watch' || r.state === 'stale' || r.state === 'silent',
           )}
         />
       )}
-      {tab === 'growing' && <ClientTable rows={rows.filter((r) => r.state === 'growing')} />}
-      {tab === 'all' && <ClientTable rows={rows} />}
+      {tab === 'growing' && <ClientTable rows={named.filter((r) => r.state === 'growing')} />}
+      {tab === 'all' && <ClientTable rows={named} />}
       {tab === 'noreports' && (buckets ? <SilenceTiles buckets={buckets} /> : <LegacyNoReports nr={nr} byTeam={data.clients.no_reports_by_team} />)}
 
       <div className="note">

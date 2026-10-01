@@ -38,7 +38,9 @@ export interface DashboardData {
   blind_by_day: { day: ISODate; recv: number; claims: number }[];
   clients: {
     summary: { state: ClientStateOrNoReports; n: number; fte: number }[];
-    rows: ClientRow[];             // only clients named at least once (last_mention not null)
+    /** 2026-10-01: silence split straight from the view. Absent on payloads older than the v2 SELECT. */
+    silence?: { reason: SilenceReason; n: number; fte: number }[];
+    rows: ClientRow[];             // every ERP company, named or not (see silence_reason)
     no_reports_by_team: { team: string; companies: number; fte: number; biggest: string[] }[];
     alias: { needs_confirm: number; unmatched_mentions: number; matched_mentions: number };
   };
@@ -166,7 +168,7 @@ export interface ClientRow {
   state_type: 'client_health' | 'money_signal' | 'client_update' | 'account_update' | null;
   state_date: ISODate | null;
   state_line: string | null;          // the line that set the state (only for at_risk/watch/growing/stable)
-  last_mention: ISODate;
+  last_mention: ISODate | null;   // null => never named in any EODR that reaches FOS
   days_silent: number | null;
   mentions_30d: number;
   n_risk_30d: number;
@@ -178,7 +180,8 @@ export interface ClientRow {
   // Added 2026-10-01, populated only when state === 'silent'. Null until n8n ships the new SELECT.
   silence_reason?: SilenceReason | null;
   team_coverage?: TeamCoverage | null;
-  last_team_report?: ISODate | null;
+  last_team_report?: ISODate | null;  // null => the serving team has never reported
+  has_alias?: boolean | null;
 }
 
 /** org_census — one row per org level, from the new view. Optional on DashboardData until n8n ships it. */

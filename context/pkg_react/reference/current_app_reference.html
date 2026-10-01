@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FBSPL · Founder's Operating System</title>
+<style>
+:root{--blue:#002cce;--orange:#fc921f;--bg:#fafafc;--surf:#ffffff;--line:#e6e6e8;--ink:#221f1f;--ink2:#474444;--ink3:#6d6e71;
+--red:#d92d20;--red-bg:#fdf3f2;--amb:#a3620a;--amb-bg:#fff8ee;--grn:#0e8f55;--grn-bg:#f0f9f4;--blue-bg:#eef1fd;--rail:#f3f3f5}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 "Avenir Next",Avenir,"Segoe UI",system-ui,-apple-system,sans-serif}
+a{color:var(--blue)}button{font:inherit;cursor:pointer}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.rail{min-height:100vh;background:var(--rail);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{padding:22px 20px 18px;border-bottom:1px solid var(--line)}.brand b{font-size:19px;letter-spacing:.02em}.brand small{display:block;font-size:11px;letter-spacing:.14em;color:var(--ink3);margin-top:6px;font-weight:600}
+.navh{font-size:11px;letter-spacing:.14em;color:var(--ink3);font-weight:600;padding:18px 20px 8px}
+.nav a{display:flex;align-items:flex-start;gap:10px;padding:9px 20px;text-decoration:none;color:var(--ink);border-left:3px solid transparent}
+.nav a small{display:block;color:var(--ink3);font-size:12px}.nav a.on{background:#e9ebf6;border-left-color:var(--blue)}.nav a.on b{color:var(--blue)}
+.nav .cnt{margin-left:auto;background:var(--red);color:#fff;border-radius:999px;font-size:11px;font-weight:700;padding:1px 8px;margin-top:2px}.nav .cnt.b{background:#dfe3fb;color:var(--blue)}
+.rail .foot{margin-top:auto;padding:16px 20px;font-size:12px;color:var(--ink3);border-top:1px solid var(--line)}.rail .foot b{color:var(--ink)}
+.main{min-width:0}
+.top{display:flex;align-items:center;gap:12px;padding:12px 28px;background:var(--surf);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.ask{flex:1;max-width:620px;display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:999px;padding:8px 14px;background:#fff;color:var(--ink3);cursor:text}
+.ask>span:first-of-type{flex:1}.ask .kbd{flex:0 0 auto}.kbd{border:1px solid var(--line);border-radius:6px;font-size:11px;padding:0 6px}
+.pill{border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.06em;padding:4px 12px;border:1px solid}
+.pill.conf{color:var(--red);border-color:#f3b8b2;background:var(--red-bg)}.pill.live{color:var(--blue);border-color:#c8d0f6;background:var(--blue-bg)}
+.who{margin-left:auto;text-align:right;font-size:12px;color:var(--ink3)}.who b{display:block;color:var(--ink);font-size:14px}
+.cstrip{display:flex;align-items:center;gap:12px;padding:10px 28px;background:var(--amb-bg);border-bottom:1px solid #f2dfc2;font-size:13px;color:var(--ink2)}
+.cstrip.high{background:var(--grn-bg);border-color:#cde9da}.cstrip.low{background:var(--red-bg);border-color:#f3cfcb}
+.cstrip .lvl{font-size:11px;letter-spacing:.12em;font-weight:700;color:var(--amb)}.cstrip .lvl b{font-size:16px;letter-spacing:0;margin-left:6px}
+.cstrip.high .lvl{color:var(--grn)}.cstrip.low .lvl{color:var(--red)}
+.cstrip .dt{margin-left:auto;border:1px solid #e7c89a;border-radius:6px;background:transparent;color:var(--amb);padding:4px 10px;font-weight:600;white-space:nowrap}
+.cdetail{padding:14px 28px;background:#fffdf8;border-bottom:1px solid #f2dfc2;font-size:13px}
+.sheet{padding:26px 28px 60px;max-width:1240px}
+.eyebrow{font-size:11px;letter-spacing:.14em;color:var(--ink3);font-weight:600;text-transform:uppercase}
+h1{font-size:25px;line-height:1.25;margin:8px 0 10px;max-width:780px}h2{font-size:18px;margin:26px 0 4px}h3{font-size:14px;margin:0 0 6px}
+.lede{color:var(--ink2);max-width:620px;margin:0 0 16px}.sub{color:var(--ink3);font-size:13px;max-width:640px;margin:0 0 12px}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:3px;background:#fff;margin:6px 0 18px}
+.tabs button{border:0;background:transparent;padding:6px 16px;border-radius:6px;font-weight:600;color:var(--ink2)}.tabs button.on{background:var(--blue);color:#fff}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:12px}
+.heroes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.hero{padding:16px 18px 0;display:flex;flex-direction:column}.hero .q{font-weight:600;font-size:15px}
+.hero .big{display:flex;align-items:baseline;gap:10px;margin:8px 0 4px}.hero .big b{font-size:40px;line-height:1;color:var(--red)}
+.hero .big b.nm{font-size:22px;color:var(--amb)}.hero .big span{color:var(--ink3);font-size:13px}
+.hero .line{border-top:1px solid var(--line);margin-top:auto;padding:10px 0;color:var(--ink3);font-size:13px}
+.why{border-top:1px solid var(--line);padding:9px 0 12px}
+.whyb{border:0;background:none;color:var(--blue);padding:0;font-weight:600;font-size:13px;border-bottom:1px dotted var(--blue)}
+.whyp{background:#f7f8fc;border:1px solid #e3e6f3;border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--ink2);margin-top:8px}
+.strip2{display:grid;grid-template-columns:repeat(3,1fr);margin-top:14px}.strip2>div{padding:14px 18px;border-right:1px solid var(--line)}.strip2>div:last-child{border-right:0}
+.strip2 .v{font-size:24px;font-weight:700;color:var(--amb)}.strip2 .v.dash{color:var(--ink)}
+.cols{display:grid;grid-template-columns:1fr 330px;gap:18px;margin-top:22px;align-items:start}
+.row{border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}
+.rh{display:flex;gap:12px;padding:14px 16px;cursor:pointer;align-items:flex-start}.rh:hover{background:#fafbff}
+.rank{min-width:26px;height:26px;border-radius:6px;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--blue-bg);color:var(--blue)}.rank.r{background:var(--red);color:#fff}
+.rt{flex:1}.rt b{font-size:15px}.chev{color:var(--ink3);transition:transform .15s}.open>.rh .chev{transform:rotate(90deg)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag{white-space:nowrap;font-size:11px;font-weight:700;letter-spacing:.03em;padding:2px 8px;border-radius:5px;border:1px solid var(--line);color:var(--ink2);background:#fff}
+.tag.red{color:var(--red);border-color:#f3b8b2;background:var(--red-bg)}.tag.amb{color:var(--amb);border-color:#efd3a6;background:var(--amb-bg)}
+.tag.grn{color:var(--grn);border-color:#b9e0cb;background:var(--grn-bg)}.tag.blue{color:var(--blue);border-color:#c8d0f6;background:var(--blue-bg)}
+.rb{padding:0 16px 16px 54px;display:none}.open>.rb{display:block}
+.box{border:1px solid var(--line);border-radius:10px;margin-top:12px;overflow:hidden}.box>.bh{padding:8px 12px;font-size:12px;font-weight:600;color:var(--ink2);background:#fafafb;border-bottom:1px solid var(--line)}
+.quote{padding:12px 14px;border-left:3px solid #c8cbe0;margin:10px 12px;font-style:italic;color:var(--ink)}
+.meta{padding:8px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--ink3)}.meta b{color:var(--ink)}
+.found{border-left:3px solid var(--red);background:var(--red-bg);padding:10px 12px;border-radius:0 8px 8px 0;margin-top:8px;font-size:13px}.found.g{border-color:var(--grn);background:var(--grn-bg)}.found.a{border-color:var(--orange);background:var(--amb-bg)}
+.lbl{font-size:11px;letter-spacing:.12em;color:var(--ink3);font-weight:700;margin:16px 0 6px;text-transform:uppercase}
+.aside .card{padding:16px}.aside h3{font-size:16px}.aside .it{border-top:1px solid var(--line);padding:12px 0}
+table{width:100%;border-collapse:collapse}th{text-align:left;font-size:12px;color:var(--ink3);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);background:#fafafb}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}td.n{text-align:right;font-variant-numeric:tabular-nums}
+.nr{color:var(--ink3);font-style:italic}.tw{overflow-x:auto}
+.mv{font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px}.mv.up{color:var(--red);background:var(--red-bg)}.mv.dn{color:var(--grn);background:var(--grn-bg)}.mv.fl{color:var(--ink3);background:#f1f1f3}
+.note{background:#f4f5fb;border:1px solid #e3e6f3;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--ink2);margin-top:12px}
+.warn{border-left:3px solid var(--orange);background:var(--amb-bg);border-radius:0 10px 10px 0;padding:12px 14px;font-size:13px;margin-top:12px}
+.dist{padding:16px 18px}.db{display:grid;grid-template-columns:150px 1fr 60px;gap:12px;align-items:center;margin:10px 0}
+.db .bar{height:12px;border-radius:6px;background:#eceef8;overflow:hidden}.db .bar i{display:block;height:100%;background:#8b9be8}.db small{grid-column:2;color:var(--ink3);margin-top:-6px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);border-radius:12px;background:#fff;margin:14px 0}
+.kpis>div{padding:12px 14px;border-right:1px solid var(--line)}.kpis>div:last-child{border-right:0}.kpis .v{font-size:24px;font-weight:700}
+.kpis .v.red{color:var(--red)}.kpis .v.amb{color:var(--amb)}.kpis .v.grn{color:var(--grn)}
+.lrow td:first-child{white-space:nowrap}.lrow{cursor:pointer}.lrow:hover td{background:#fafbff}.ldet td{background:#fcfcfd}
+.empty{padding:20px;color:var(--ink3);text-align:center}
+.take{display:inline-block;margin-top:12px;background:var(--blue);color:#fff;text-decoration:none;border-radius:6px;padding:6px 14px;font-weight:600;font-size:13px}
+.spark{display:block;width:100%;height:34px;margin:4px 0}
+.ovl{position:fixed;inset:0;background:rgba(20,20,30,.28);display:none;z-index:20}.ovl.on{display:block}
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:#fff;border-left:1px solid var(--line);z-index:21;transform:translateX(100%);transition:transform .2s;display:flex;flex-direction:column}
+.panel.on{transform:none}.panel .ph{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start}.panel .ph button{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:6px;width:30px;height:30px}
+.panel .pb{padding:18px 22px;overflow:auto}.qbtn{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 14px;margin:8px 0}.qbtn b{display:block}.qbtn small{color:var(--ink3)}
+.verdict{display:inline-block;font-weight:700;font-size:12px;letter-spacing:.08em;padding:3px 10px;border-radius:5px;margin-bottom:8px}
+.verdict.y{color:var(--grn);background:var(--grn-bg)}.verdict.n{color:var(--red);background:var(--red-bg)}.verdict.c{color:var(--amb);background:var(--amb-bg)}
+.askin{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;margin-bottom:6px}
+.pagefoot{border-top:1px solid var(--line);padding:16px 28px;font-size:12px;color:var(--ink3);display:flex;gap:28px;flex-wrap:wrap}
+@media(max-width:1000px){.app{grid-template-columns:1fr}.rail{position:static;height:auto}.heroes,.strip2,.kpis{grid-template-columns:1fr 1fr}.cols{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<noscript><div style="padding:24px;font-family:system-ui">This view needs JavaScript. Open the plain board instead: <a href="__BASE__fos-dashboard">fos-dashboard</a></div></noscript>
+<div id="app"></div>
+<script type="application/json" id="fos-data" data-base="__BASE_ATTR__">__DATA_JSON__</script>
+<script>
+(function(){
+"use strict";
+var D = JSON.parse(document.getElementById('fos-data').textContent || '{}');
+var BASE = document.getElementById('fos-data').getAttribute('data-base') || '';
+
+/* ---------- tiny safe DOM builder: data only ever goes into text nodes ---------- */
+function h(tag, attrs){
+  var el = document.createElement(tag), i, k;
+  if (attrs) for (k in attrs) {
+    if (!Object.prototype.hasOwnProperty.call(attrs,k) || attrs[k]==null || attrs[k]===false) continue;
+    if (k === 'on') { for (var ev in attrs.on) el.addEventListener(ev, attrs.on[ev]); }
+    else if (k === 'cls') el.className = attrs[k];
+    else if (k === 'href') { var u = String(attrs[k]); if (/^(https?:\/\/|#|fos-)/.test(u)) el.setAttribute('href', u); }
+    else el.setAttribute(k, attrs[k]);
+  }
+  for (i = 2; i < arguments.length; i++) add(el, arguments[i]);
+  return el;
+}
+function add(el, c){ if (c==null || c===false) return; if (Array.isArray(c)) { c.forEach(function(x){add(el,x);}); return; }
+  el.appendChild(typeof c === 'object' && c.nodeType ? c : document.createTextNode(String(c))); }
+function svgSpark(vals){
+  var ns='http://www.w3.org/2000/svg', s=document.createElementNS(ns,'svg'); s.setAttribute('viewBox','0 0 100 30'); s.setAttribute('preserveAspectRatio','none'); s.setAttribute('class','spark');
+  var pts = vals.map(function(v,i){return v==null?null:[i*(100/Math.max(1,vals.length-1)), v];}).filter(Boolean);
+  if (!pts.length) return s; var mx = Math.max.apply(null, pts.map(function(p){return p[1];}).concat([1]));
+  var d = pts.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+' '+(26-(p[1]/mx)*22).toFixed(1);}).join(' ');
+  var pa=document.createElementNS(ns,'path'); pa.setAttribute('d',d); pa.setAttribute('fill','none'); pa.setAttribute('stroke','#d92d20'); pa.setAttribute('stroke-width','1.6'); s.appendChild(pa);
+  var last=pts[pts.length-1], c=document.createElementNS(ns,'circle'); c.setAttribute('cx',last[0]); c.setAttribute('cy',(26-(last[1]/mx)*22)); c.setAttribute('r','2.2'); c.setAttribute('fill','#d92d20'); s.appendChild(c);
+  return s;
+}
+/* ---------- helpers ---------- */
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function dd(s){ if(!s) return '—'; var p=String(s).slice(0,10).split('-'); return (+p[2])+' '+MON[(+p[1])-1]; }
+function dlong(s){ var dt=new Date(String(s).slice(0,10)+'T00:00:00'); return dt.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
+function hoursSince(iso){ if(!iso) return null; var t=new Date(iso).getTime(); return isFinite(t)? (Date.now()-t)/36e5 : null; }
+function ago(hh){ if(hh==null) return 'never'; if(hh<1) return Math.round(hh*60)+' min ago'; if(hh<48) return Math.round(hh)+' h ago'; return Math.round(hh/24)+' days ago'; }
+function typeName(t){ return String(t||'').replace(/_/g,' '); }
+var DOMAIN_NAMES={insurance_ops:'Insurance operations',sales_calls:'Sales calls',sales_marketing:'Sales & marketing',qa:'QA',hr:'HR',ai_ml:'AI / ML',accounts:'Accounts & finance',training:'L&D / training',admin_mis:'Admin · MIS',admin_facility:'Admin · facility',process_excellence_audit:'Process excellence · audit',process_excellence_summary:'Process excellence · summary'};
+function domName(d){ return DOMAIN_NAMES[d] || cap(typeName(d)); }
+function cap(s){ s=String(s||''); return s.charAt(0).toUpperCase()+s.slice(1); }
+function arr(x){ return Array.isArray(x)?x:[]; }
+var days = arr(D.days), win = arr(D.window), tickets = arr(D.tickets), exp = D.expected||{tl:0,um:0};
+var byDay = {}; days.forEach(function(d){ byDay[String(d.day).slice(0,10)] = d; });
+var latest = D.latest_data_day ? String(D.latest_data_day).slice(0,10) : null, latestS = latest ? byDay[latest] : null;
+var today = String(D.today||'').slice(0,10);
+var reportDays = days.filter(function(d){ return d.claims>0 && String(d.day).slice(0,10) < today; });
+var gapDays = days.filter(function(d){ return !(d.claims>0) && String(d.day).slice(0,10) < today; }).map(function(d){return dd(d.day);});
+var open = tickets.filter(function(t){ return t.status!=='closed'; });
+var pastDue = open.filter(function(t){ return t.past_sla; });
+var founder = open.filter(function(t){ return t.needs_founder; });
+var recurring = tickets.filter(function(t){ return t.event_count>=2 || t.reopened; });
+var reopened = tickets.filter(function(t){ return t.reopened; });
+var riskAcc = arr(D.risk && D.risk.accounts);
+var missingTL = arr(D.missing_tl_latest);
+var lastRun = [D.freshness&&D.freshness.teams_ingest, D.freshness&&D.freshness.rnn_ingest].filter(Boolean).sort().pop();
+var stale = (hoursSince(lastRun) == null || hoursSince(lastRun) > 6);
+
+/* confidence: coverage of TL layer on the last complete day + pipeline freshness */
+var tlMiss = latestS ? Math.max(0, exp.tl - latestS.tl_recv) : exp.tl;
+var missRatio = exp.tl ? tlMiss/exp.tl : 1;
+var conf = (stale || !latestS || missRatio > 0.3) ? 'Low' : (missRatio > 0.1 || gapDays.length) ? 'Medium' : 'High';
+
+/* ---------- derivation texts (every number has a path) ---------- */
+var WHY = {
+  risk: 'Counted: ERP clients whose latest status line in the last 30 days is at risk — client-health cancellation, cancellation risk, work moving in-house, POC leaving, or automation risk. Report names are matched to ERP companies; FTE comes from the ERP deal hierarchy. Money-signal cancellations are excluded: in insurance work they usually describe a policy, not the client.',
+  hide: 'Not measured yet. This needs the suppression detector (associate raised it, the layer above did not carry it up). A naive account-level matcher flagged 91–98% of cases and was rejected, so this card reads "not measured" instead of a false 0.',
+  never: 'Counted: open tickets whose SLA (opened date + SLA days) has passed and that have no closure evidence yet. Closure needs a later "resolved" claim or an agent-verified verbatim quote. Tickets start from '+dd(D.start_date)+'.',
+  money: 'No system holds billing rates or contract values, so revenue at risk cannot be computed and is never estimated. FTE is the only money unit the pipeline supports: the sum of ERP FTE for clients currently at risk.',
+  util100: 'Counted on '+(latest?dd(latest):'the last complete day')+': people whose utilisation for the day is exactly 100.0 (one number per person, averaged across RNN and Teams). This is a typed field — attested, not measured.',
+  reopen: 'Counted: tickets that were closed on evidence and then the same issue came back (a linked "#2" ticket was opened).',
+  matrix: 'Each cell is counted from the claim table for that day. A day with no claims at all reads n/r (not reported) — never 0. Team Lead and UM counts only include people on the reporting_edge roster ('+exp.tl+' TLs, '+exp.um+' UMs).'
+};
+function whyBtn(key, label){
+  var p = h('div',{cls:'whyp',hidden:'hidden'}, WHY[key]||'');
+  var b = h('button',{cls:'whyb',type:'button',on:{click:function(){ if(p.hasAttribute('hidden')) p.removeAttribute('hidden'); else p.setAttribute('hidden','hidden'); }}}, '↗ '+(label||'Where this comes from'));
+  return h('div',{cls:'why'}, b, p);
+}
+
+/* ---------- ticket building blocks ---------- */
+function tTitle(t){ return cap(typeName(t.canonical_type))+(t.account_canonical?' — '+t.account_canonical:'')+' · '+t.subject_name; }
+function closureBadge(t){
+  if (t.status==='closed' && t.close_reason==='evidence') return h('span',{cls:'tag grn'},'Closed — evidence found');
+  if (t.status==='closed') return h('span',{cls:'tag'},'Closed — '+(t.close_reason||'stale'));
+  if (t.reopened) return h('span',{cls:'tag red'},'Fix applied, did not work');
+  if (t.verify_status==='needs_review') return h('span',{cls:'tag blue'},'Needs review');
+  if (t.verify_status==='still_open') return h('span',{cls:'tag amb'},'Still being reported');
+  return h('span',{cls:'tag'},'No evidence either way');
+}
+function deadline(t){ var ms=new Date(String(t.opened_date).slice(0,10)+'T00:00:00').getTime()+(t.sla_days||0)*864e5; return new Date(ms).toISOString().slice(0,10); }
+function relDue(t){
+  if (t.status==='closed') return null;
+  var diff = Math.round((new Date(today+'T00:00:00') - new Date(deadline(t)+'T00:00:00'))/864e5);
+  if (diff>0) return h('span',{cls:'tag red'},diff+'d past'); if (diff===0) return h('span',{cls:'tag amb'},'due today'); return h('span',{cls:'tag grn'},'in '+(-diff)+'d');
+}
+function evidence(t){
+  var s=t.source||{}; var line = s.span || s.text;
+  if (!line) return h('div',{cls:'box'}, h('div',{cls:'bh'},'The line someone actually wrote'),
+    h('div',{cls:'quote',style:'font-style:normal;color:#6d6e71'},'Source line not stored for this ticket (created before evidence pointers were added). The agent will re-check it against later reports.'));
+  return h('div',{cls:'box'}, h('div',{cls:'bh'},'The line someone actually wrote'),
+    h('div',{cls:'quote'},'“'+line+'”'),
+    h('div',{cls:'meta'}, h('b',null,s.sender_name||'Unknown'),' · '+(s.role||'role unknown')+'   ·   EODR '+dd(s.report_date)));
+}
+function chain(t){
+  var ev = arr(t.events);
+  if (!ev.length) return h('div',{cls:'sub'},'No agent activity recorded yet.');
+  return h('ul',{style:'margin:4px 0;padding-left:18px'}, ev.map(function(e){
+    return h('li',null, h('span',{cls:'nr'}, e.ts+'  '), typeName(e.event)+' — '+typeName(e.actor)); }));
+}
+function closureSearch(t){
+  if (t.status==='closed'){ var ce=t.close_evidence||{};
+    return h('div',{cls:'found g'}, h('b',null,'Closed on evidence. '), ce.quote?('“'+ce.quote+'”'):(ce.rule?String(ce.rule).replace(/_/g,' '):''), ce.report_date?(' — '+dd(ce.report_date)):''); }
+  var msg = t.verify_status==='still_open' ? ['Still being reported. ','The same issue appeared again on '+dd(t.last_seen_date)+'.','a']
+          : t.verify_status==='needs_review' ? ['Needs review. ', (t.verify_note||'The agent could not verify a closing line.'),'a']
+          : ['Found: nothing, in either direction. ','No later line closes it and no line contradicts it. The verdict is no evidence of closure — deliberately not the same claim as not done.',''];
+  return h('div',{cls:'found '+msg[2]}, h('b',null,msg[0]), msg[1]);
+}
+function ticketBody(t){
+  var c=t.agent_case||null;
+  return [
+    h('p',{style:'margin:0;color:#474444'}, 'Raised '+dd(t.opened_date)+' about '+t.subject_name+(t.account_canonical?' on '+t.account_canonical:'')+'. Owner: '+t.owner_name+' ('+String(t.owner_level||'').toUpperCase()+'). Reported on '+t.event_count+' day(s); last seen '+dd(t.last_seen_date)+'.'),
+    evidence(t),
+    h('div',{cls:'lbl'},'Search for closure'), closureSearch(t),
+    c ? h('div',{cls:'box'}, h('div',{cls:'bh'},'Case file (attention agent)'),
+          h('div',{style:'padding:10px 12px;font-size:13px'},
+            c.what_happened?h('p',{style:'margin:0 0 6px'},h('b',null,'What happened. '),c.what_happened):null,
+            c.why_it_matters?h('p',{style:'margin:0 0 6px'},h('b',null,'Why it matters. '),c.why_it_matters):null,
+            c.recommended_decision?h('p',{style:'margin:0 0 6px'},h('b',null,'What to change. '),c.recommended_decision):null,
+            c.draft_nudge?h('p',{style:'margin:0;color:#6d6e71'},h('b',null,'Draft nudge (not sent). '),c.draft_nudge):null)) : null,
+    h('div',{cls:'lbl'},'Agent trail'), chain(t),
+    (t.status!=='closed' && !t.needs_founder && BASE) ? h('a',{cls:'take',href:BASE+'fos-take?ticket_id='+encodeURIComponent(t.ticket_id),target:'_top'},'Take this') : null
+  ];
+}
+function acc(head, bodyFn){
+  var r = h('div',{cls:'row'}); var body=h('div',{cls:'rb'});
+  var hd = h('div',{cls:'rh',on:{click:function(){ if(!body.firstChild) add(body, bodyFn()); r.classList.toggle('open'); }}}, head, h('span',{cls:'chev'},'›'));
+  add(r,[hd,body]); return r;
+}
+function ticketRow(t, i){
+  return acc([ h('span',{cls:'rank'+(i<3&&t.severity==='contradiction'?' r':'')}, String(i+1)),
+    h('div',{cls:'rt'}, h('b',null,tTitle(t)),
+      h('div',{cls:'tags'}, h('span',{cls:'tag '+(t.severity==='contradiction'?'red':'amb')}, t.severity==='contradiction'?'HIGH':'MATERIAL'),
+        h('span',{cls:'tag'},'Owner: '+t.owner_name), h('span',{cls:'tag'},'Due '+dd(deadline(t))), relDue(t),
+        t.event_count>=2?h('span',{cls:'tag amb'},t.event_count+'-day chain'):null, t.needs_founder?h('span',{cls:'tag blue'},'flagged for you'):null)) ],
+    function(){ return ticketBody(t); });
+}
+
+/* ---------- screens ---------- */
+function screenBrief(tab){
+  var out=[];
+  var head = pastDue.length ? (open.length+' open item'+(open.length===1?'':'s')+' — '+pastDue.length+' past their deadline with no closure evidence.')
+           : open.length ? (open.length+' open item'+(open.length===1?'':'s')+', none past deadline yet.') : 'Nothing is open on the board yet.';
+  out.push(h('div',{cls:'eyebrow'},'Brief · '+dlong(today)), h('h1',null, head),
+    h('p',{cls:'lede'}, 'Ranked items are capped at seven — the cap forces the ranking to be honest. Every item opens in place to the line a named person wrote. Where a pod did not report, this screen says unknown — it will not say no issues.'));
+  var tabs=h('div',{cls:'tabs'}); ['Today','Last 5 days','Recurring'].forEach(function(n,i){ add(tabs,h('button',{cls:tab===i?'on':'',type:'button',on:{click:function(){ route('brief',i); }}},n)); });
+  out.push(tabs);
+  if (tab===1) return out.concat(briefWindow());
+  if (tab===2) return out.concat(briefRecurring());
+  /* heroes */
+  var rbd = arr(D.risk&&D.risk.by_day).map(function(x){ return byDay[String(x.day).slice(0,10)] && byDay[String(x.day).slice(0,10)].claims>0 ? x.n : null; });
+  out.push(h('div',{cls:'heroes'},
+    h('div',{cls:'card hero'}, h('div',{cls:'q'},'Am I about to lose a client?'),
+      h('div',{cls:'big'}, h('b',null,String(clRisk.length)), h('span',null,'client'+(clRisk.length===1?'':'s')+' at risk · '+(MONEY.fte_at_risk||0)+' FTE')),
+      h('div',{cls:'line'}, clRisk[0] ? (clRisk[0].company_name+' — '+typeName(clRisk[0].state_reason)+' · '+clWatch.length+' more on watch') : (clWatch.length+' on watch, none at risk')),
+      h('div',{cls:'why',style:'border-top:0;padding-top:0'}, h('button',{cls:'whyb',type:'button',on:{click:function(){ route('clients',0); }}},'Open the clients →')),
+      whyBtn('risk','Where the '+clRisk.length+' comes from')),
+    h('div',{cls:'card hero'}, h('div',{cls:'q'},'Is anyone hiding something from me?'),
+      h('div',{cls:'big'}, h('b',{cls:'nm'},'Not measured'), null), h('div',{cls:'line'},'Suppression detector not connected — this is unknown, not zero.'), whyBtn('hide','Why this is blank')),
+    h('div',{cls:'card hero'}, h('div',{cls:'q'},'What did I ask for that never came back?'),
+      h('div',{cls:'big'}, h('b',null,String(pastDue.length)), h('span',null,'of '+tickets.length+' tickets past deadline')),
+      h('div',{cls:'line'},'No closure evidence in any later report'), whyBtn('never','Where the '+pastDue.length+' comes from'))));
+  out.push(h('div',{cls:'card strip2'},
+    h('div',null, h('div',{cls:'q'},'Am I about to lose money?'), h('div',{cls:'v'}, (MONEY.fte_at_risk||0)+' FTE'), h('div',{cls:'sub',style:'margin:0'},'at risk · revenue is not in any system'), whyBtn('money')),
+    h('div',null, h('div',{cls:'q'},'People at exactly 100% utilisation'), h('div',{cls:'v'}, latestS?String(latestS.util_100):'n/r'), h('div',{cls:'sub',style:'margin:0'},'Attested, not measured'+(latestS?' · '+dd(latest):'')), whyBtn('util100')),
+    h('div',null, h('div',{cls:'q'},'Defects recurring after a fix'), h('div',{cls:'v'}, String(reopened.length)), h('div',{cls:'sub',style:'margin:0'}, reopened.length?reopened.map(function(t){return t.account_canonical||t.subject_name;}).join(' · '):'None reopened yet'), whyBtn('reopen'))));
+  /* ranked + aside */
+  var ranked = open.slice(0,7);
+  var list = h('div',{cls:'card'}, ranked.length ? ranked.map(ticketRow) : h('div',{cls:'empty'},'Nothing ranked yet. Tickets appear here once the creator agent finds a signal on or after '+dd(D.start_date)+'.'));
+  var aside = h('div',{cls:'aside'},
+    h('div',{cls:'card'}, h('h3',null,'What I am blind to'),
+      h('div',{cls:'sub'}, latest ? (tlMiss+' of '+exp.tl+' Team Leads did not report on '+dd(latest)+'. Their pods read unknown.') : 'No complete reporting day in the window.'),
+      missingTL.length ? h('div',{style:'font-size:12.5px;color:#474444;line-height:1.7'}, missingTL.join(' · ')) : null,
+      gapDays.length ? h('div',{cls:'it'}, h('b',null,'No data at all: '), gapDays.join(', '), h('div',{cls:'sub',style:'margin:4px 0 0'},'Pipeline did not run or nothing was ingested. Treat as unknown.')) : null),
+    h('div',{cls:'card',style:'margin-top:14px'}, h('h3',null,'Only you can decide these'),
+      h('div',{cls:'sub'},'Process-rule proposals (48-hour client-block rule, auto-surface with a no-blame window…) with Approve / Defer arrive in the next phase. Nothing here is decided for you.')));
+  out.push(h('h2',null,'What needs you — ranked, capped at seven'),
+    h('div',{cls:'sub'},'Ranked by what changes if you act today: flagged for you first, then contradictions, then how long and how often it has repeated.'),
+    h('div',{cls:'cols'}, list, aside));
+  return out;
+}
+function briefWindow(){
+  var cols = win.map(function(d){ return String(d).slice(0,10); });
+  function cell(day, key){ var s=byDay[day]; if(!s || !(s.claims>0)) return null; if(day===today) return null; var v=s[key]; return (v==null)?null:v; }
+  var rows = [
+    ['Team Lead reports received','of '+exp.tl,'tl_recv'],['Umbrella Manager reports','of '+exp.um,'um_recv'],['Associate reports','volume','va_recv'],
+    ['Utilisation average','%','util_avg'],['People below the 85% target','count','util_below85'],['Near-zero utilisation','count','util_near0'],
+    ['People at exactly 100%','count','util_100'],['Tickets opened','count','tickets_opened']];
+  var tb = h('tbody');
+  rows.forEach(function(r){
+    var vals = cols.map(function(d){ return cell(d,r[2]); });
+    var have = vals.filter(function(v){return v!=null;});
+    var mv = have.length>=2 ? Math.round((have[have.length-1]-have[0])*10)/10 : null;
+    var up = /below|near|tickets/.test(r[2]) ? 'up' : 'dn';
+    add(tb, h('tr',null, h('td',null,h('b',null,r[0]),' ',h('span',{cls:'nr',style:'font-style:normal'},r[1])),
+      vals.map(function(v){ return h('td',{cls:'n'}, v==null?h('span',{cls:'nr'},'n/r'):String(v)); }),
+      h('td',null, mv==null?h('span',{cls:'mv fl'},'—'): mv===0?h('span',{cls:'mv fl'},'flat'): h('span',{cls:'mv '+((mv>0)===(up==='up')?'up':'dn')},(mv>0?'+':'')+mv))));
+  });
+  var s = latestS, tot = s ? Math.max(1,s.util_people) : 1;
+  function db(label, n, note){ return h('div',{cls:'db'}, h('div',{style:'color:#6d6e71;text-align:right'},label), h('div',{cls:'bar'}, h('i',{style:'width:'+Math.round(100*(n||0)/tot)+'%'})), h('b',{style:'text-align:right'}, n==null?'n/r':String(n)), h('small',null,note)); }
+  var bl = arr(D.backlog);
+  return [
+    h('h2',null,'Five reporting days, side by side'),
+    h('div',{cls:'sub'},'Each column is one working day. A day that did not report reads n/r — the whole argument of this product is that n/r and 0 must never be the same colour.'),
+    h('div',{cls:'card tw'}, h('table',null, h('thead',null,h('tr',null,h('th',null,'Measure'), cols.map(function(d){return h('th',{cls:'n'},dd(d)+(d===today?' (today)':''));}), h('th',null,'Move'))), tb)),
+    h('div',{cls:'note'}, 'n/r means not reported that day. It does not mean zero. Today’s column stays n/r until the day is complete. ', whyBtn('matrix','Where every cell comes from')),
+    h('h2',null,'Utilisation, as a distribution'),
+    h('div',{cls:'sub'}, s ? ('The '+(s.util_avg==null?'n/r':s.util_avg+'%')+' average on '+dd(latest)+' sits between populations and describes none of them. '+s.util_people+' people reported a figure.') : 'No complete day in the window.'),
+    h('div',{cls:'card dist'},
+      db('Exactly 100.0%', s&&s.util_100, 'A field this many people fill in identically is not a measurement.'),
+      db('Below 85% target', s&&s.util_below85, 'Below the target band.'),
+      db('Near zero', s&&s.util_near0, 'Starved of work while others report saturation.'),
+      h('div',{cls:'warn'}, h('b',null,'Attested, not measured. '),'Every utilisation figure here is typed by the reporter. It becomes a measurement once it is derived from production-tracker task counts.')),
+    h('h2',null,'Client backlogs — which ones are actually moving'),
+    h('div',{cls:'sub'},'Pending-volume figures stated for a named account. A frozen number is a different problem from a growing one.'),
+    bl.length ? h('div',{cls:'card tw'}, h('table',null,
+      h('thead',null,h('tr',null,h('th',null,'Account'), cols.map(function(d){return h('th',{cls:'n'},dd(d));}), h('th',null,'State'))),
+      h('tbody',null, bl.map(function(b){ var v=arr(b.v).map(function(x){return x.v;}); var have=v.filter(function(x){return x!=null;});
+        var st = have.length<2 ? ['single reading','']: (have[have.length-1]===have[0] ? ['frozen','amb'] : ['moving','']);
+        return h('tr',null, h('td',null,h('b',null,b.acct)), v.map(function(x){return h('td',{cls:'n'}, x==null?h('span',{cls:'nr'},'n/r'):String(x));}), h('td',null,h('span',{cls:'tag '+st[1]},st[0]))); }))))
+      : h('div',{cls:'card empty'},'No account-level backlog figures in the window. This needs pending counts tagged with an account in the EODR extraction.'),
+    h('div',{cls:'note'},'Where an account was not listed on a day the cell reads n/r. Most of this grid is missing rather than stable.')];
+}
+function briefRecurring(){
+  return [ h('h2',null, recurring.length ? (recurring.length+' thing'+(recurring.length===1?'':'s')+' that repeat'+(reopened.length?(' — and '+reopened.length+' fix'+(reopened.length===1?'':'es')+' that did not hold'):'')) : 'Nothing has repeated yet'),
+    h('div',{cls:'sub'},'A recurring problem and a new problem need different responses. This view is why the ledger tracks closure rather than issuance.'),
+    h('div',{cls:'card'}, recurring.length ? recurring.map(function(t,i){ return acc([h('span',{cls:'rank'+(t.reopened?' r':'')},String(i+1)),
+      h('div',{cls:'rt'}, h('b',null,tTitle(t)), h('div',{cls:'tags'}, h('span',{cls:'tag '+(t.severity==='contradiction'?'red':'amb')},t.severity==='contradiction'?'HIGH':'MATERIAL'),
+        t.reopened?h('span',{cls:'tag red'},'FIX APPLIED — NOT WORKING'):h('span',{cls:'tag amb'},'OPEN · STILL REPORTED'),
+        h('span',{cls:'tag'}, dd(t.opened_date)+' → '+dd(t.last_seen_date)+' · '+t.event_count+' day(s)')))], function(){return ticketBody(t);}); })
+      : h('div',{cls:'empty'},'A ticket lands here when the same issue is reported on two or more days, or comes back after it was closed.')) ];
+}
+
+/* ---------- clients ---------- */
+var CL = D.clients || {}, clRows = arr(CL.rows), clSum = arr(CL.summary), MONEY = D.money || {};
+var ST = {at_risk:['At risk','red'], watch:['Watch','amb'], growing:['Growing','grn'], stable:['Stable','grn'],
+          mentioned:['Mentioned, no status',''], silent:['Went quiet 14+ days','blue'], no_reports:['No reports reach FOS','red']};
+function stTag(s){ var x=ST[s]||[s,'']; return h('span',{cls:'tag '+x[1]}, x[0]); }
+function sumOf(s){ var r=clSum.filter(function(x){return x.state===s;})[0]; return r||{n:0,fte:0}; }
+var clRisk = clRows.filter(function(c){return c.state==='at_risk';});
+var clWatch = clRows.filter(function(c){return c.state==='watch';});
+function ownerOf(c){ return c.owner ? c.owner : (c.n_tls>1 ? c.n_tls+' TLs share this client' : 'owner unknown'); }
+function clientBody(c){
+  var moneyNote = c.state_type==='money_signal' && c.state==='watch';
+  return [
+    c.state_line ? h('div',{cls:'box'}, h('div',{cls:'bh'},'The line that set this state'),
+        h('div',{cls:'quote'},'“'+c.state_line+'”'),
+        h('div',{cls:'meta'}, typeName(c.state_type)+' · '+typeName(c.state_reason)+' · '+dd(c.state_date)))
+      : h('div',{cls:'sub'}, c.state==='silent' ? ('Nobody has named this client in an EODR for '+c.days_silent+' days. That is unknown, not stable.')
+                                              : 'Named in reports, but no line states how the client is doing.'),
+    moneyNote ? h('div',{cls:'found a'}, h('b',null,'Read the line before acting. '),'This came from a money signal. In insurance work "cancellation", "non-renewal" and "payment" usually describe the insured’s policy, not the client leaving FBSPL — so it is Watch, not At risk.') : null,
+    h('div',{cls:'lbl'},'Last 30 days'),
+    h('div',{style:'font-size:13px'}, c.mentions_30d+' mention(s) · '+c.n_risk_30d+' at-risk · '+c.n_watch_30d+' watch · '+c.n_growing_30d+' growing signals. Last named '+dd(c.last_mention)+(c.days_silent!=null?(' ('+c.days_silent+' days ago)'):'')+'.'),
+    h('div',{cls:'lbl'},'Who owns it'), h('div',{style:'font-size:13px'}, ownerOf(c)+' · team '+(c.teams||'—')+' · '+c.fte+' FTE (ERP)')
+  ];
+}
+function clientTable(rows){
+  if (!rows.length) return h('div',{cls:'card empty'},'None.');
+  var tb=h('tbody');
+  rows.forEach(function(c){
+    var det=h('tr',{cls:'ldet',hidden:'hidden'}, h('td',{colspan:'6'}, clientBody(c)));
+    var row=h('tr',{cls:'lrow',on:{click:function(){ if(det.hasAttribute('hidden')) det.removeAttribute('hidden'); else det.setAttribute('hidden','hidden'); }}},
+      h('td',null,h('b',null,c.company_name)), h('td',null,c.teams||'—'), h('td',{cls:'n'},String(c.fte)),
+      h('td',null,stTag(c.state)), h('td',null,ownerOf(c)),
+      h('td',null, c.state_date ? (typeName(c.state_reason)+' · '+dd(c.state_date)) : ('last named '+dd(c.last_mention))));
+    add(tb,[row,det]);
+  });
+  return h('div',{cls:'card tw'}, h('table',null, h('thead',null,h('tr',null,['Client','Team','FTE','State','Owner','Latest'].map(function(x){return h('th',{cls:x==='FTE'?'n':null},x);}))), tb));
+}
+function screenClients(tab){
+  var nr = sumOf('no_reports'), al = CL.alias || {};
+  var out=[ h('div',{cls:'eyebrow'},'Clients · last 30 days'),
+    h('h1',null, clRisk.length ? (clRisk.length+' client'+(clRisk.length===1?'':'s')+' at risk ('+(MONEY.fte_at_risk||0)+' FTE). '+clWatch.length+' more on watch.') : 'No client is at risk in the last 30 days.'),
+    h('p',{cls:'lede'},'Each client’s state comes from the latest line that says how it is doing — never from a score. A client nobody has named for 14 days reads “went quiet”, and a client whose team’s reports never reach FOS reads “no reports” — neither is “stable”.'),
+    h('div',{cls:'kpis',style:'grid-template-columns:repeat(5,1fr)'},
+      ['at_risk','watch','growing','silent','no_reports'].map(function(k){ var x=sumOf(k), c=ST[k];
+        return h('div',null, h('div',{cls:'sub',style:'margin:0'},c[0]), h('div',{cls:'v '+(c[1]==='red'?'red':c[1]==='amb'?'amb':c[1]==='grn'?'grn':'')},String(x.n)), h('div',{cls:'sub',style:'margin:0'},x.fte+' FTE')); }))];
+  var tabs=h('div',{cls:'tabs'}); ['Needs attention','Growing','All named','No reports reach FOS'].forEach(function(n,i){ add(tabs,h('button',{cls:tab===i?'on':'',type:'button',on:{click:function(){ route('clients',i); }}},n)); });
+  out.push(tabs);
+  if (tab===0) out.push(clientTable(clRows.filter(function(c){return c.state==='at_risk'||c.state==='watch'||c.state==='silent';})));
+  if (tab===1) out.push(clientTable(clRows.filter(function(c){return c.state==='growing';})));
+  if (tab===2) out.push(clientTable(clRows));
+  if (tab===3) out.push(h('div',{cls:'sub'}, nr.n+' clients ('+nr.fte+' FTE) have never been named in any EODR that reaches FOS. The teams below serve them — their reports are not in the pipeline.'),
+    h('div',{cls:'card tw'}, h('table',null, h('thead',null,h('tr',null,['Team','Clients','FTE','Largest'].map(function(x){return h('th',null,x);}))),
+      h('tbody',null, arr(CL.no_reports_by_team).map(function(t){ return h('tr',null, h('td',null,h('b',null,t.team)), h('td',{cls:'n'},String(t.companies)), h('td',{cls:'n'},String(t.fte)), h('td',null, arr(t.biggest).join(' · '))); })))));
+  out.push(h('div',{cls:'note'}, 'Client names in reports are matched to ERP companies automatically ('+(al.matched_mentions||0)+' mentions matched). '+(al.needs_confirm||0)+' names match more than one company and wait for a human to confirm; '+(al.unmatched_mentions||0)+' mentions did not match any ERP client — internal work, abbreviations, or names the matcher missed.'));
+  return out;
+}
+function screenLedger(){
+  var closedEv = tickets.filter(function(t){return t.status==='closed'&&t.close_reason==='evidence';});
+  var unknown = open.filter(function(t){ return !t.past_sla && (t.verify_status==null||t.verify_status==='unverified'||t.verify_status==='needs_review'); });
+  function k(v,cls,label,key){ return h('div',null, h('div',{cls:'sub',style:'margin:0'},label), h('div',{cls:'v '+cls},String(v))); }
+  var tb=h('tbody');
+  tickets.forEach(function(t){
+    var det=h('tr',{cls:'ldet',hidden:'hidden'}, h('td',{colspan:'6'},
+      h('div',{cls:'lbl',style:'margin-top:4px'},'Where this ticket came from'),
+      h('div',{cls:'sub',style:'margin:0'}, 'Opened by the creator agent on '+dd(t.opened_date)+' from '+(/^[aeiou]/i.test(typeName(t.canonical_type))?'an ':'a ')+typeName(t.canonical_type)+' signal'+(t.account_canonical?' on '+t.account_canonical:'')+'.'),
+      h('div',{cls:'lbl'},'The finding underneath it'), evidence(t),
+      h('div',{cls:'lbl'},'The search for closure evidence'), closureSearch(t),
+      h('div',{cls:'lbl'},'Deadline'),
+      h('div',{style:'font-size:13px'}, 'Opened '+dd(t.opened_date)+' + '+t.sla_days+'-day SLA = '+dd(deadline(t))+'. Today is '+dd(today)+'.'+(t.status!=='closed'&&t.past_sla?' That is past the deadline set by the ticket rule, not by a target this dashboard invented.':'')),
+      h('div',{cls:'lbl'},'Agent trail'), chain(t)));
+    var row=h('tr',{cls:'lrow',on:{click:function(){ if(det.hasAttribute('hidden')) det.removeAttribute('hidden'); else det.setAttribute('hidden','hidden'); }}},
+      h('td',null,h('b',{style:'color:#002cce'},'T-'+t.ticket_id)),
+      h('td',null,h('b',null,cap(typeName(t.canonical_type))+(t.account_canonical?' — '+t.account_canonical:'')), h('div',{cls:'sub',style:'margin:0'}, dd(t.opened_date)+' · subject '+t.subject_name)),
+      h('td',null,t.owner_name, h('div',{cls:'sub',style:'margin:0'},String(t.owner_level||'').toUpperCase())),
+      h('td',null,h('span',{cls:'tag '+(t.severity==='contradiction'?'red':'amb')}, t.severity==='contradiction'?'Critical':'High')),
+      h('td',null, dd(deadline(t)),' ',relDue(t)),
+      h('td',null, closureBadge(t)));
+    add(tb,[row,det]);
+  });
+  return [ h('div',{cls:'eyebrow'},'Ledger · '+tickets.length+' tickets since '+dd(D.start_date)),
+    h('h1',null, tickets.length ? ('The agents opened '+tickets.length+' ticket'+(tickets.length===1?'':'s')+'. '+pastDue.length+' '+(pastDue.length===1?'is':'are')+' past deadline with no closure evidence.') : 'No tickets yet.'),
+    h('p',{cls:'lede'},'Tickets are created and closed by agents only. The honest verdict on most open rows is no evidence of closure — which is a different statement from not done, and this screen keeps them separate.'),
+    h('div',{cls:'kpis'}, k(tickets.length,'','Tickets opened'), k(pastDue.length,'red','Past deadline, no evidence'), k(reopened.length,'red','Fixed and still broken'), k(closedEv.length,'grn','Closed on evidence'), k(unknown.length,'amb','Simply unknown')),
+    h('div',{cls:'warn',style:'border-color:#d92d20;background:#fdf3f2'}, h('b',null,'Every row opens. '),'Click a ticket to see the line that caused it, what the verifier searched for, and the deadline arithmetic.'),
+    tickets.length ? h('div',{cls:'card tw',style:'margin-top:14px'}, h('table',null, h('thead',null,h('tr',null,['Ref','Ticket','Owner','Priority','Deadline','Closure evidence'].map(function(x){return h('th',null,x);}))), tb))
+      : h('div',{cls:'card empty',style:'margin-top:14px'},'The creator agent has not opened any ticket since '+dd(D.start_date)+'.') ];
+}
+function screenSources(){
+  var doms = arr(D.domains);
+  function tier(d){ if (d.domain==='insurance_ops') return ['pipeline · traceable','grn']; if (d.msgs_window>0) return ['partial · Teams EODR','amb']; return ['connected · silent','']; }
+  var tiers = {live:0,partial:0,silent:0}; doms.forEach(function(d){ var t=tier(d)[1]; if(t==='grn')tiers.live++; else if(t==='amb')tiers.partial++; else tiers.silent++; });
+  return [ h('div',{cls:'eyebrow'},'Sources · provenance and coverage'),
+    h('h1',null, tiers.live+' of '+doms.length+' reporting functions '+(tiers.live===1?'is':'are')+' fully in the pipeline. That is why confidence reads '+conf+'.'),
+    h('p',{cls:'lede'},'Pipeline figures are traceable to a named reporter. Gaps are listed as gaps rather than left as white space.'),
+    h('div',{cls:'kpis',style:'grid-template-columns:repeat(3,1fr)'},
+      h('div',null,h('div',{cls:'sub',style:'margin:0'},'In the pipeline'),h('div',{cls:'v grn'},String(tiers.live))),
+      h('div',null,h('div',{cls:'sub',style:'margin:0'},'Partial'),h('div',{cls:'v amb'},String(tiers.partial))),
+      h('div',null,h('div',{cls:'sub',style:'margin:0'},'Connected, silent this window'),h('div',{cls:'v'},String(tiers.silent)))),
+    h('div',{cls:'note'},'This table lists every Teams channel marked as a reporting channel. A function with no channel at all does not appear here — tell the system which functions are expected so their absence becomes a visible gap.'),
+    h('h2',null,'Money'),
+    h('div',{cls:'sub'},'Split deliberately. The first column is what the reporting stream supports. The second is anything typed in by hand — labelled and never totalled with the first.'),
+    h('div',{cls:'heroes',style:'grid-template-columns:1fr 1fr'},
+      h('div',{cls:'card',style:'padding:16px'}, h('h3',null,'From the pipeline ',h('span',{cls:'tag grn'},'pipeline · traceable')),
+        h('div',{cls:'lbl'},'Revenue at risk, by named account'), h('b',null,'Cannot answer'), h('div',{cls:'sub'},'The EODR stream names accounts at risk but carries no contract value for any of them.'),
+        h('div',{cls:'lbl'},'FTE by client state (ERP)'),
+        h('div',{style:'font-size:13px;line-height:1.8'}, h('b',{style:'color:#d92d20'},(MONEY.fte_at_risk||0)+' FTE'),' at risk · ',h('b',null,(MONEY.fte_watch||0)+' FTE'),' on watch · ',h('b',{style:'color:#0e8f55'},(MONEY.fte_growing||0)+' FTE'),' growing · ',h('b',null,(MONEY.fte_no_reports||0)+' FTE'),' with no reports reaching FOS · of '+(MONEY.fte_total||0)+' FTE total.'),
+        h('div',{cls:'lbl'},'Clients at risk, named'), clRisk.length ? h('ul',{style:'margin:0;padding-left:18px'}, clRisk.map(function(c){ return h('li',null,h('b',null,c.company_name),' — '+typeName(c.state_reason)+' · '+c.fte+' FTE · '+dd(c.state_date), c.state_line?h('div',{cls:'sub',style:'margin:2px 0 6px;font-style:italic'},'“'+c.state_line+'”'):null); })) : h('div',{cls:'sub'},'None in the last 30 days.'),
+        h('div',{cls:'lbl'},'Money figures reported in EODRs (not reconciled)'),
+        arr(MONEY.currency_lines).length ? h('ul',{style:'margin:0;padding-left:18px'}, arr(MONEY.currency_lines).map(function(m){ return h('li',null,'“'+m.line+'”', h('div',{cls:'sub',style:'margin:0 0 6px'}, (m.sender||'unknown')+' · '+(m.account||'no account')+' · '+dd(m.report_date))); }))
+          : h('div',{cls:'sub'},'None in the last 30 days.'),
+        h('div',{cls:'sub',style:'margin-top:6px'},'Shown as written. Currencies are never converted or added up.')),
+      h('div',{cls:'card',style:'padding:16px'}, h('h3',null,'Manual entry ',h('span',{cls:'tag amb'},'manual · not pipeline-fed')),
+        h('div',{cls:'sub'},'No manual figures are connected yet (revenue targets, FTE billing, errors per FTE). When they are, they appear here with their origin and are never summed with the pipeline column.'))),
+    h('h2',null,'Functions and the honest status of their feed'),
+    h('div',{cls:'card tw',style:'margin-top:10px'}, h('table',null, h('thead',null,h('tr',null,['Function','Teams','Tier','Messages in window','Last message'].map(function(x){return h('th',null,x);}))),
+      h('tbody',null, doms.map(function(d){ var t=tier(d); return h('tr',null, h('td',null,h('b',null,domName(d.domain))), h('td',null,d.channels), h('td',null,h('span',{cls:'tag '+t[1]},t[0])), h('td',{cls:'n'},String(d.msgs_window)), h('td',null,dd(d.last_msg))); })))),
+    h('h2',null,'What I am blind to'),
+    h('div',{cls:'card tw',style:'margin-top:10px'}, h('table',null, h('thead',null,h('tr',null,['Day','TL reports received','Missing','Read'].map(function(x){return h('th',null,x);}))),
+      h('tbody',null, days.map(function(d){ var day=String(d.day).slice(0,10), none=!(d.claims>0), isToday=day===today;
+        return h('tr',null, h('td',null,dd(day)), h('td',{cls:'n'}, (none||isToday)?h('span',{cls:'nr'},isToday?'in progress':'n/r'):(d.tl_recv+' / '+exp.tl)), h('td',{cls:'n'}, (none||isToday)?h('span',{cls:'nr'},'—'):String(exp.tl-d.tl_recv)),
+          h('td',null, isToday?'Day not complete':none?h('span',{cls:'tag red'},'no data — pipeline gap'):(d.tl_recv===exp.tl?'Complete':'Never complete'))); }))))];
+}
+function screenInbox(){
+  return [ h('div',{cls:'eyebrow'},'Inbox · waiting for you'), h('h1',null, founder.length ? (founder.length+' ticket'+(founder.length===1?'':'s')+' flagged for your attention.') : 'Nothing is waiting for you.'),
+    h('p',{cls:'lede'},'A ticket arrives here when it passes its SLA while still being reported, repeats on three or more days, or you press “Take this”. The attention agent attaches a case file with verified quotes.'),
+    h('div',{cls:'card'}, founder.length ? founder.map(ticketRow) : h('div',{cls:'empty'},'Empty.')) ];
+}
+
+/* ---------- ask panel (deterministic answers; free text needs the Ask agent) ---------- */
+var QS = [
+  {q:'What did I ask for that never came back?', s:'Open tickets past deadline with no closure evidence', a:function(){ return pastDue.length ? ['n', pastDue.length+' ticket(s) are past deadline with no closure evidence.', pastDue.slice(0,8).map(function(t){return 'T-'+t.ticket_id+' · '+tTitle(t)+' · owner '+t.owner_name;})] : ['y','Nothing is past deadline.',[]]; }},
+  {q:'Which Team Leads did not report on the last complete day?', s:'Coverage, not a guess', a:function(){ return latest ? ['n', tlMiss+' of '+exp.tl+' Team Leads did not report on '+dd(latest)+'.', missingTL] : ['c','There is no complete reporting day in the window.',[]]; }},
+  {q:'Show me utilisation as a distribution, not an average', s:'Attested figures, one per person', a:function(){ var s=latestS; return s ? ['y','On '+dd(latest)+': '+s.util_people+' people reported a figure (average '+s.util_avg+'%).',['Exactly 100%: '+s.util_100,'Below 85%: '+s.util_below85,'Near zero: '+s.util_near0,'These are typed by the reporter — attested, not measured.']] : ['c','No complete day to answer from.',[]]; }},
+  {q:'Which clients are at risk right now?', s:'Latest status line per ERP client, 30 days', a:function(){ return clRisk.length ? ['n', clRisk.length+' client(s) at risk ('+(MONEY.fte_at_risk||0)+' FTE); '+clWatch.length+' more on watch.', clRisk.map(function(c){return c.company_name+' — '+typeName(c.state_reason)+' · '+c.fte+' FTE · '+dd(c.state_date);})] : ['y','No client is at risk in the last 30 days.',[]]; }},
+  {q:'What is my revenue at risk this quarter, by named account?', s:'The question the system should refuse', a:function(){ return ['c','Cannot answer. Contract value is not in the pipeline, so any number here would be invented.',[]]; }}
+];
+function showAnswer(box, item){
+  var r=item.a(); box.textContent='';
+  add(box, [ h('div',{cls:'verdict '+r[0]}, r[0]==='y'?'YES':r[0]==='n'?'NEEDS YOU':'CANNOT ANSWER'), h('div',null,h('b',null,item.q)), h('p',null,r[1]),
+    r[2].length ? h('ul',{style:'padding-left:18px'}, r[2].map(function(x){return h('li',null,x);})) : null,
+    h('button',{cls:'whyb',type:'button',on:{click:function(){ renderAsk(); }}},'← Other questions') ]);
+}
+var askBody;
+function renderAsk(){
+  askBody.textContent='';
+  var inp=h('input',{cls:'askin',placeholder:'Type a question…',type:'text'}); var msg=h('div',{cls:'sub'});
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ msg.textContent='Free-text questions need the Ask agent, which is not connected yet. The questions below are answered from live data.'; }});
+  add(askBody,[ inp, msg, h('p',{cls:'sub'},'Each answer below is computed from the same live data as the screens, so it cannot disagree with them. One of them is a refusal.'),
+    QS.map(function(item){ return h('button',{cls:'qbtn',type:'button',on:{click:function(){ showAnswer(askBody,item); }}}, h('b',null,item.q), h('small',null,item.s)); }) ]);
+}
+function openAsk(){ ovl.classList.add('on'); panel.classList.add('on'); renderAsk(); }
+function closeAsk(){ ovl.classList.remove('on'); panel.classList.remove('on'); }
+
+/* ---------- frame ---------- */
+var state={screen:'brief',tab:0}, sheet, ovl, panel;
+function route(screen, tab){ state.screen=screen; state.tab=tab||0; draw(); window.scrollTo(0,0); }
+function nav(key, label, sub, cnt, cls){
+  return h('a',{href:'#'+key,cls:state.screen===key?'on':'',on:{click:function(e){ e.preventDefault(); route(key,0); }}},
+    h('div',null, h('b',null,label), h('small',null,sub)), cnt?h('span',{cls:'cnt '+(cls||'')},String(cnt)):null);
+}
+function draw(){
+  var root=document.getElementById('app'); root.textContent='';
+  var coverageText = latestS
+    ? ['Built from ', h('b',null,String(reportDays.reduce(function(a,d){return a+d.claims;},0))), ' claims across '+reportDays.length+' reporting day(s) ('+reportDays.map(function(d){return dd(d.day);}).join(', ')+'). ',
+       h('b',null, tlMiss+' of '+exp.tl+' Team Leads'), ' did not report on '+dd(latest)+' — those pods read ', h('b',null,'unknown'), ', not ', h('i',null,'no issues'), '.',
+       gapDays.length?(' No data at all on '+gapDays.join(', ')+'.'):'', stale?(' Pipeline last ran '+ago(hoursSince(lastRun))+'.'):'']
+    : ['No complete reporting day in the window. Everything on this screen is unknown.'];
+  var detail = h('div',{cls:'cdetail',hidden:'hidden'},
+    h('table',{style:'max-width:760px'}, h('thead',null,h('tr',null,['Layer','Expected','Received on '+(latest?dd(latest):'—'),'Today so far'].map(function(x){return h('th',null,x);}))),
+      h('tbody',null,
+        h('tr',null,h('td',null,'Team Leads'),h('td',{cls:'n'},String(exp.tl)),h('td',{cls:'n'},latestS?String(latestS.tl_recv):'n/r'),h('td',{cls:'n'},D.today_in_progress?String(D.today_in_progress.tl):'—')),
+        h('tr',null,h('td',null,'Umbrella Managers'),h('td',{cls:'n'},String(exp.um)),h('td',{cls:'n'},latestS?String(latestS.um_recv):'n/r'),h('td',{cls:'n'},D.today_in_progress?String(D.today_in_progress.um):'—')),
+        h('tr',null,h('td',null,'Associates (VA)'),h('td',{cls:'n nr'},'roster-free'),h('td',{cls:'n'},latestS?String(latestS.va_recv):'n/r'),h('td',{cls:'n'},D.today_in_progress?String(D.today_in_progress.va):'—')))),
+    h('div',{cls:'sub',style:'margin-top:8px'},'Last Teams ingest '+ago(hoursSince(D.freshness&&D.freshness.teams_ingest))+' · last RNN ingest '+ago(hoursSince(D.freshness&&D.freshness.rnn_ingest))+' · newest claim '+dd(D.freshness&&D.freshness.latest_claim)+'.'));
+  var dbtn = h('button',{cls:'dt',type:'button',on:{click:function(){ if(detail.hasAttribute('hidden')) detail.removeAttribute('hidden'); else detail.setAttribute('hidden','hidden'); }}},'Coverage detail ↓');
+  var screen = state.screen==='clients'?screenClients(state.tab): state.screen==='ledger'?screenLedger(): state.screen==='sources'?screenSources(): state.screen==='inbox'?screenInbox(): screenBrief(state.tab);
+  sheet = h('div',{cls:'sheet'}, screen);
+  ovl = h('div',{cls:'ovl',on:{click:closeAsk}});
+  askBody = h('div',{cls:'pb'});
+  panel = h('div',{cls:'panel',role:'dialog'}, h('div',{cls:'ph'}, h('div',null,h('div',{cls:'eyebrow'},'Ask'),h('h3',{style:'font-size:20px;margin:4px 0 0'},'Ask the corpus')), h('button',{type:'button',on:{click:closeAsk}},'×')), askBody);
+  add(root, h('div',{cls:'app'},
+    h('aside',{cls:'rail'}, h('div',{cls:'brand'},h('b',null,'FBSPL'),h('small',null,'FOUNDER’S OPERATING SYSTEM')),
+      h('div',{cls:'navh'},'WHERE TO LOOK'),
+      h('nav',{cls:'nav'}, nav('brief','Brief','What needs me today',Math.min(7,open.length)), nav('clients','Clients','Who might leave, who is quiet',clRisk.length), nav('ledger','Ledger','What the agents are tracking',pastDue.length), nav('sources','Sources','How much can I believe'), nav('inbox','Inbox','Waiting for me',founder.length,'b')),
+      h('div',{cls:'foot'}, h('b',null,'Live · '+dd(today)), h('div',null,'Built from Teams + RNN EODRs through the FOS pipeline. Tickets from '+dd(D.start_date)+'. Generated '+new Date(D.generated_at).toLocaleString('en-GB',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+' IST.'))),
+    h('main',{cls:'main'},
+      h('div',{cls:'top'}, h('div',{cls:'ask',on:{click:openAsk}}, '⌕ ', h('span',null,'Ask the corpus — what did I ask for that never came back?'), h('span',{cls:'kbd'},'Ask')),
+        h('span',{cls:'pill conf'},'CONFIDENTIAL'), h('span',{cls:'pill live'},'LIVE'),
+        h('div',{cls:'who'},h('b',null,'MSD'),'Founder view')),
+      h('div',{cls:'cstrip '+conf.toLowerCase()}, h('span',{cls:'lvl'},'CONFIDENCE',h('b',null,conf)), h('span',null,coverageText), dbtn),
+      detail, sheet,
+      h('div',{cls:'pagefoot'}, h('span',null,h('b',null,'Live'),' — reads the FOS database on every load.'), h('span',null,'Agents create and close tickets; nothing on this screen is edited by hand.'), h('span',null,'Every figure is traceable to a line a named person wrote, or says n/r.'))),
+    ovl, panel));
+}
+document.addEventListener('keydown',function(e){ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); openAsk(); } if(e.key==='Escape') closeAsk(); });
+draw();
+})();
+</script>
+</body>
+</html>

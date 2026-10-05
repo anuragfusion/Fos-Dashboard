@@ -24,6 +24,11 @@ async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
       signal: ctl.signal,
       headers: {
         ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+        // Served through an ngrok free tunnel, every request is met by an
+        // interstitial warning page that returns HTML instead of our JSON.
+        // This header is ngrok's documented way to skip it. Harmless anywhere
+        // else - a header no other proxy reads.
+        'ngrok-skip-browser-warning': 'true',
         ...(init.headers ?? {}),
       },
     });

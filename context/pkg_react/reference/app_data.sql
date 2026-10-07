@@ -127,8 +127,8 @@ select jsonb_build_object(
              t.status, t.verify_status, t.verify_note, t.needs_founder, t.founder_reason, t.opened_date, t.last_seen_date,
              t.closed_date, t.close_reason, t.close_evidence, t.event_count, t.age, t.sla_days, t.reopened, t.agent_case,
              (t.status<>'closed' and t.age > t.sla_days) as past_sla,
-             (case when t.needs_founder then 1000 else 0 end + case when t.severity='contradiction' then 100 else 0 end
-              + least(t.event_count,9)*10 + least(t.age,9)) as rank_key,
+             (case when t.needs_founder then 50 else 0 end + case when t.severity='contradiction' then 100 else 0 end
+              + least(t.event_count,9)*10 - least(greatest(((select d from today) - t.last_seen_date),0),30)) as rank_key,
              (select to_jsonb(s) - 'ticket_id' from t_src s where s.ticket_id=t.ticket_id) as source,
              (select coalesce(jsonb_agg(jsonb_build_object('ts',to_char(e.created_at at time zone 'Asia/Kolkata','DD Mon HH24:MI'),
                       'event',e.event_type,'actor',e.actor,'detail',e.detail) order by e.created_at),'[]'::jsonb)

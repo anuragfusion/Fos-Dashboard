@@ -20,7 +20,10 @@ export function TodayTab() {
   const fteRisk = data.money?.fte_at_risk ?? 0;
   const missingTL = data.missing_tl_latest ?? [];
   const latest = data.latest_data_day;
-  const ranked = d.open.slice(0, 7);
+  // Only what was reported in the last two days of data. See derive.ts for why
+  // this is not a plain `today` filter and why needs_founder tickets drop out.
+  const ranked = d.fresh.slice(0, 7);
+  const parked = d.open.length - d.fresh.length;
 
   return (
     <>
@@ -102,10 +105,20 @@ export function TodayTab() {
       </div>
 
       {/* Ranked + aside */}
-      <h2>What needs you — ranked, capped at seven</h2>
+      <h2>What needs you today — ranked, capped at seven</h2>
       <div className="sub">
-        Ranked by what changes if you act today: flagged for you first, then contradictions, then how long and how often
-        it has repeated.
+        Only tickets something was reported about on {d.freshFrom ? `${dd(d.freshFrom)} or later` : 'the latest reporting day'}.
+        Within that, ranked by contradictions first, then how often it has repeated.
+        {parked > 0 && (
+          <>
+            {' '}
+            {parked} older open ticket{parked === 1 ? '' : 's'} {parked === 1 ? 'is' : 'are'} not shown here — nothing new
+            was said about {parked === 1 ? 'it' : 'them'}.{' '}
+            <button type="button" className="whyb" onClick={() => navigate('/ledger')}>
+              See all in the Ledger →
+            </button>
+          </>
+        )}
       </div>
       <div className="cols">
         <div className="card">
@@ -115,7 +128,7 @@ export function TodayTab() {
             ))
           ) : (
             <div className="empty">
-              Nothing ranked yet. Tickets appear here once the creator agent finds a signal on or after {dd(data.start_date)}.
+              Nothing reported recently. Tickets appear here once the creator agent finds a signal on or after {dd(data.start_date)}.
             </div>
           )}
         </div>

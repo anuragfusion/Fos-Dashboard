@@ -1,5 +1,5 @@
 import type { ClientRow, DashboardData, DayStats, Ticket } from '../api/types';
-import { daysBetween, deadline, hoursSince } from './dates';
+import { daysBetween, deadline, hoursSince, shiftDays } from './dates';
 
 export type Confidence = 'Low' | 'Medium' | 'High';
 
@@ -9,6 +9,10 @@ export interface Derived {
   reportDays: DayStats[];
   gapDays: DayStats[];
   open: Ticket[];
+  /** Open tickets something was actually reported about in the last two days of data. */
+  fresh: Ticket[];
+  /** The day `fresh` starts from, or null when no open ticket carries a last_seen_date. */
+  freshFrom: string | null;
   pastDue: Ticket[];
   founderQueue: Ticket[];
   recurring: Ticket[];
@@ -33,6 +37,30 @@ export function derive(d: DashboardData, now: number = Date.now()): Derived {
 
   const tickets = d.tickets ?? [];
   const open = tickets.filter((t) => t.status !== 'closed');
+  // BRIEF SCOPE (09 Oct 2026). The Brief answers "what needs me today", but it
+  // ranked every open ticket back to the config start date, and rank_key adds 50
+  // for needs_founder -- enough to pin a ticket to the top for good. Measured on
+  // 9 Oct: positions 1-5 were the five founder-flagged tickets last reported on
+  // 28 Sep (x3), 29 Sep and 5 Oct, while the eleven tickets something was
+  // actually said about on 8 Oct never appeared at all. Nothing is lost by
+  // dropping those five here: needs_founder tickets ARE the Inbox
+  // (founderQueue below), which is where a decision waiting on the founder
+  // belongs. Showing them in both places made the Brief identical every morning.
+  //
+  // The cutoff anchors on the newest last_seen among OPEN TICKETS, not on
+  // `today`. EODRs arrive in the evening and the pipeline runs every two hours,
+  // so a literal today-filter would leave the Brief empty every morning and for
+  // the whole of Monday after a weekend. Two days of data, not two calendar
+  // days, so a gap day or a holiday cannot blank the screen.
+  const seen = (t: Ticket) => String(t.last_seen_date ?? '').slice(0, 10);
+  const newestSeen = open.map(seen).filter(Boolean).sort().pop() ?? null;
+  const freshFrom = newestSeen ? shiftDays(newestSeen, -1) : null;
+  // Fall back to every open ticket rather than rendering an empty Brief: a blank
+  // screen reads as "nothing is wrong", which is a different and worse claim
+  // than "nothing was reported recently".
+  const freshList = freshFrom ? open.filter((t) => seen(t) >= freshFrom) : [];
+  const fresh = freshList.length ? freshList : open;
+
   const pastDue = open.filter((t) => t.past_sla);
   const founderQueue = open.filter((t) => t.needs_founder);
   const recurring = tickets.filter((t) => t.event_count >= 2 || t.reopened);
@@ -52,7 +80,7 @@ export function derive(d: DashboardData, now: number = Date.now()): Derived {
   const conf: Confidence =
     stale || !latestS || missRatio > 0.3 ? 'Low' : missRatio > 0.1 || gapDays.length > 0 ? 'Medium' : 'High';
 
-  return { byDay, latestS, reportDays, gapDays, open, pastDue, founderQueue, recurring, reopened, tlMiss, missRatio, lastRun, stale, conf };
+  return { byDay, latestS, reportDays, gapDays, open, fresh, freshFrom, pastDue, founderQueue, recurring, reopened, tlMiss, missRatio, lastRun, stale, conf };
 }
 
 /** Relative-due, open tickets only. Returns null for closed. */

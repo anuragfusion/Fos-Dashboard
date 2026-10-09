@@ -21,6 +21,12 @@ export function deadline(opened_date: string, sla_days: number): string {
   return new Date(ms).toISOString().slice(0, 10);
 }
 
+/** Shift a 'YYYY-MM-DD' by n days (negative goes back), UTC-anchored. */
+export function shiftDays(day: string, n: number): string {
+  const ms = Date.parse(String(day).slice(0, 10) + 'T00:00:00Z') + n * 864e5;
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
 /** Signed day-diff `today - target`, UTC-anchored so time zone can't shift the answer. */
 export function daysBetween(today: string, target: string): number {
   const a = Date.parse(String(today).slice(0, 10) + 'T00:00:00Z');

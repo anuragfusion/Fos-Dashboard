@@ -1,4 +1,4 @@
-import type { ClientRow, DashboardData, DayStats, Ticket } from '../api/types';
+import type { ClientRow, DashboardData, DayStats, RiskAccount, Ticket } from '../api/types';
 import { daysBetween, deadline, hoursSince, shiftDays } from './dates';
 
 export type Confidence = 'Low' | 'Medium' | 'High';
@@ -9,6 +9,14 @@ export interface Derived {
   reportDays: DayStats[];
   gapDays: DayStats[];
   open: Ticket[];
+  /** Accounts the reports flagged on the last three reporting days. */
+  riskRecent: RiskAccount[];
+  /** The first of those three reporting days, or null when the window is empty. */
+  riskFrom: string | null;
+  /** ERP FTE summed over riskRecent — only the accounts that matched a company. */
+  riskRecentFte: number;
+  /** How many of riskRecent carry no FTE because the name never matched ERP. */
+  riskRecentUnpriced: number;
   /** Open tickets something was actually reported about in the last two days of data. */
   fresh: Ticket[];
   /** The day `fresh` starts from, or null when no open ticket carries a last_seen_date. */
@@ -34,6 +42,35 @@ export function derive(d: DashboardData, now: number = Date.now()): Derived {
 
   const reportDays = days.filter((x) => x.claims > 0 && String(x.day).slice(0, 10) < today);
   const gapDays = days.filter((x) => x.claims === 0 && String(x.day).slice(0, 10) < today);
+
+  // CLIENT RISK ON THE BRIEF (14 Oct 2026). The hero tile used to read
+  // `clients.rows` (the client_health view) and showed "0 clients at risk" on a
+  // day the reports carried fifteen flagged accounts, four of them outright
+  // losses. Three things drop a signal on the way to that view, all measured:
+  //   - signal_status_map has no row for the statuses the extractor actually
+  //     emits most often -- `lost` (8 claims/8 accounts in 30d) and `at_risk`
+  //     (8/8). No map row means no bucket, and client_signal keeps only rows
+  //     that have one.
+  //   - some accounts have no client_alias row at all (pba blue guardian,
+  //     robert s., box insurance, eric m.), so the signal never reaches a company.
+  //   - one alias exists but is still `unmatched`, which the view excludes.
+  // This reads `risk` instead: the same claims the Brief's risk strip is built
+  // from, before any of that. It is the honest number, and it is the one the
+  // founder is looking at when they ask whether a client is leaving.
+  //
+  // Three REPORTING days, not three calendar days, so a weekend or a holiday
+  // cannot quietly empty the tile. `window` is the API's own reporting-day list.
+  const win = (d.window ?? []).map((x) => String(x).slice(0, 10)).sort();
+  const riskFrom = win.length ? win[Math.max(0, win.length - 3)] : null;
+  const riskAll = d.risk?.accounts ?? [];
+  const riskRecent = riskFrom
+    ? riskAll.filter((r) => String(r.last ?? '').slice(0, 10) >= riskFrom)
+    : riskAll;
+  // FTE is summed only over accounts ERP could price. The rest are counted
+  // separately rather than folded in as zero, which would read as "no exposure".
+  const riskRecentFte =
+    Math.round(riskRecent.reduce((s, r) => s + (typeof r.fte === 'number' ? r.fte : 0), 0) * 10) / 10;
+  const riskRecentUnpriced = riskRecent.filter((r) => typeof r.fte !== 'number').length;
 
   const tickets = d.tickets ?? [];
   const open = tickets.filter((t) => t.status !== 'closed');
@@ -80,7 +117,7 @@ export function derive(d: DashboardData, now: number = Date.now()): Derived {
   const conf: Confidence =
     stale || !latestS || missRatio > 0.3 ? 'Low' : missRatio > 0.1 || gapDays.length > 0 ? 'Medium' : 'High';
 
-  return { byDay, latestS, reportDays, gapDays, open, fresh, freshFrom, pastDue, founderQueue, recurring, reopened, tlMiss, missRatio, lastRun, stale, conf };
+  return { byDay, latestS, reportDays, gapDays, open, riskRecent, riskFrom, riskRecentFte, riskRecentUnpriced, fresh, freshFrom, pastDue, founderQueue, recurring, reopened, tlMiss, missRatio, lastRun, stale, conf };
 }
 
 /** Relative-due, open tickets only. Returns null for closed. */

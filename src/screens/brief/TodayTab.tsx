@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { useDash } from '../../App';
 import { derive } from '../../lib/derive';
 import { whyMap } from '../../lib/derivations';
-import { typeName } from '../../lib/labels';
 import { dd } from '../../lib/dates';
 import { WhyToggle } from '../../components/WhyToggle';
 import { TicketRow } from '../../components/TicketRow';
@@ -16,7 +15,6 @@ export function TodayTab() {
 
   const rows = data.clients?.rows ?? [];
   const clRisk = rows.filter((c) => c.state === 'at_risk');
-  const clWatch = rows.filter((c) => c.state === 'watch');
   const fteRisk = data.money?.fte_at_risk ?? 0;
   const missingTL = data.missing_tl_latest ?? [];
   const latest = data.latest_data_day;
@@ -28,20 +26,47 @@ export function TodayTab() {
   return (
     <>
       <div className="heroes">
-        {/* Hero 1: clients */}
+        {/* Hero 1: clients. Reads `risk` (the reports themselves), not the
+            client_health view — see derive.ts for the three places that view
+            drops a signal. */}
         <div className="card hero">
           <div className="q">Am I about to lose a client?</div>
           <div className="big">
-            <b>{clRisk.length}</b>
+            <b>{d.riskRecent.length}</b>
             <span>
-              client{clRisk.length === 1 ? '' : 's'} at risk · {fteRisk} FTE
+              account{d.riskRecent.length === 1 ? '' : 's'} flagged
+              {d.riskFrom ? ` since ${dd(d.riskFrom)}` : ''}
+              {d.riskRecentFte > 0 ? ` · ${d.riskRecentFte} FTE named` : ''}
             </span>
           </div>
           <div className="line">
-            {clRisk[0]
-              ? `${clRisk[0].company_name} — ${typeName(clRisk[0].state_reason)} · ${clWatch.length} more on watch`
-              : `${clWatch.length} on watch, none at risk`}
+            {d.riskRecent[0] ? (
+              <>
+                <b>{d.riskRecent[0].acct}</b> — {d.riskRecent[0].kinds}
+                {d.riskRecent[0].quote ? ` · “${d.riskRecent[0].quote}”` : ''}
+              </>
+            ) : (
+              'Nothing flagged in the last three reporting days.'
+            )}
           </div>
+          {d.riskRecent.length > 1 && (
+            <div className="sub" style={{ margin: '6px 0 0' }}>
+              {d.riskRecent.slice(1, 5).map((r) => r.acct).join(' · ')}
+              {d.riskRecent.length > 5 ? ` · +${d.riskRecent.length - 5} more` : ''}
+            </div>
+          )}
+          {d.riskRecentUnpriced > 0 && (
+            <div className="sub" style={{ margin: '6px 0 0' }}>
+              {d.riskRecentUnpriced} of these carry no FTE — the name never matched an ERP company, so the
+              exposure is unknown, not zero.
+            </div>
+          )}
+          {clRisk.length !== d.riskRecent.length && (
+            <div className="sub" style={{ margin: '6px 0 0' }}>
+              The client list shows {clRisk.length} at risk ({fteRisk} FTE) over 30 days. It only counts accounts
+              that matched an ERP company and whose status word exists in the signal map, so it reads lower.
+            </div>
+          )}
           <div className="why" style={{ borderTop: 0, paddingTop: 0 }}>
             <button
               type="button"
@@ -51,7 +76,18 @@ export function TodayTab() {
               Open the clients →
             </button>
           </div>
-          <WhyToggle label={`Where the ${clRisk.length} comes from`} text={why.risk} />
+          <WhyToggle
+            label={`Where the ${d.riskRecent.length} comes from`}
+            text={
+              `Every account the EOD reports themselves flagged on the last three reporting days` +
+              `${d.riskFrom ? ` (${dd(d.riskFrom)} onwards)` : ''}, taken straight from the extracted claims: ` +
+              `client-health lines of any kind, plus money signals for cancellation, non-renewal or a payment issue. ` +
+              `No ERP match is required, so an account that exists only in the reports still appears — with its FTE ` +
+              `left blank rather than counted as zero. ` +
+              `The clients list answers a different question over 30 days and will not match this number; ` +
+              `where they disagree, this one is closer to what people actually wrote.`
+            }
+          />
         </div>
 
         {/* Hero 2: hiding */}

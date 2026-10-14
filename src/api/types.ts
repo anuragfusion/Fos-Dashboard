@@ -31,7 +31,14 @@ export interface DashboardData {
     latest_claim: ISODate | null;
   };
   /** legacy block, superseded by clients — ignore in the React app */
-  risk?: unknown;
+  /**
+   * Accounts the EODR stream itself flagged, straight from `claim` — no ERP
+   * company match, no alias lookup, no 30-day state machine. This is the raw
+   * signal the Brief's risk strip is built from, and it sees things
+   * `clients.rows` cannot: a report can name an account that has no row in
+   * client_master at all. Typed on 14 Oct 2026; the payload has always carried it.
+   */
+  risk?: RiskPayload;
   tickets: Ticket[];               // board tickets (origin='signal', opened_date >= start_date), pre-ranked
   backlog: BacklogRow[];
   domains: DomainRow[];
@@ -55,6 +62,27 @@ export interface DashboardData {
   // Added 2026-10-01. Absent until n8n ships the new SELECTs — UI must render null-safe.
   org_census?: OrgCensusRow[];
   org_eodr_gaps?: OrgEodrGap[];
+}
+
+/** One account the reports flagged, as the API aggregates it over the window. */
+export interface RiskAccount {
+  /** account_canonical as written in the report — may be a person ("karen d."). */
+  acct: string;
+  first: ISODate;
+  last: ISODate;
+  days: number;
+  /** comma-joined raw statuses, e.g. "cancellation" or "downsize, restructuring". */
+  kinds: string;
+  /** ERP FTE when the name matched a company; null when it did not. */
+  fte: number | null;
+  /** the line a person actually wrote. */
+  quote: string | null;
+}
+
+export interface RiskPayload {
+  accounts: RiskAccount[];
+  by_day: { day: ISODate; n: number }[];
+  fte_named: number | null;
 }
 
 export interface DayStats {

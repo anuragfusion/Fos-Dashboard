@@ -171,14 +171,78 @@ export function TodayTab() {
         <div className="aside">
           <div className="card">
             <h3>What I am blind to</h3>
+
+            {/* Coverage first: how much of the org this Brief actually read.
+                A blank screen reads as "all clear"; this says what was read. */}
             <div className="sub">
-              {latest
-                ? `${d.tlMiss} of ${data.expected.tl} Team Leads did not report on ${dd(latest)}. Their pods read unknown.`
+              {latest && d.latestS
+                ? `Built from ${d.latestS.tl_recv} of ${data.expected.tl} pods reporting on ${dd(latest)}.`
                 : 'No complete reporting day in the window.'}
             </div>
-            {missingTL.length > 0 && (
-              <div style={{ fontSize: 12.5, color: 'var(--ink2)', lineHeight: 1.7 }}>
-                {missingTL.join(' · ')}
+
+            {/* 1. The real gap — and ONLY the real gap. Names appear here and
+                   nowhere else on this card, because this is the only list the
+                   founder should act on person by person. */}
+            {latest && d.tlMiss > 0 && (
+              <div className="it">
+                <b>
+                  {d.tlMiss} pod{d.tlMiss === 1 ? '' : 's'} had no Team Lead report on {dd(latest)}
+                </b>
+                {missingTL.length > 0 && (
+                  <div style={{ fontSize: 12.5, color: 'var(--ink2)', lineHeight: 1.7, marginTop: 4 }}>
+                    {missingTL.join(' · ')}
+                  </div>
+                )}
+                <div className="sub" style={{ margin: '4px 0 0' }}>
+                  Nothing can be said about their pods for that day.
+                </div>
+              </div>
+            )}
+
+            {/* 2. Our own defect. Deliberately unnamed: a person whose record is
+                   split in two did file a report, and listing them as absent is
+                   a false accusation the founder may act on. */}
+            {data.coverage && data.coverage.claims_unattributed_30d > 0 && (
+              <div className="it">
+                <b>
+                  {data.coverage.claims_unattributed_30d.toLocaleString()} claims in 30 days could not be matched to a
+                  person
+                </b>
+                <div className="sub" style={{ margin: '4px 0 0' }}>
+                  {data.coverage.senders_unresolved_30d} sender
+                  {data.coverage.senders_unresolved_30d === 1 ? '' : 's'} unresolved ·{' '}
+                  {data.coverage.half_records} half-record{data.coverage.half_records === 1 ? '' : 's'} in the registry.
+                  The work was reported; the pipeline could not say by whom. This is ours to fix, not theirs.
+                </div>
+              </div>
+            )}
+
+            {/* 3. So "37" is never mistaken for the headcount. */}
+            {data.coverage && data.coverage.tl_without_pod > 0 && (
+              <div className="it">
+                <b>
+                  {data.coverage.tl_with_pod} pods · {data.coverage.tl_total} Team Leads in all
+                </b>
+                <div className="sub" style={{ margin: '4px 0 0' }}>
+                  {data.coverage.tl_without_pod} lead specialist teams with no VA pod
+                  {data.coverage.tl_without_pod_reported > 0
+                    ? `, ${data.coverage.tl_without_pod_reported} of whom reported on ${dd(latest)}`
+                    : ''}
+                  . They are not counted above.
+                </div>
+              </div>
+            )}
+
+            {/* 4. Work that belongs to nobody. A decision, not a gap. */}
+            {data.coverage && data.coverage.orphan_tickets > 0 && (
+              <div className="it">
+                <b>
+                  {data.coverage.orphan_tickets} open ticket{data.coverage.orphan_tickets === 1 ? '' : 's'} belong to
+                  people who have left
+                </b>
+                <div className="sub" style={{ margin: '4px 0 0' }}>
+                  No one is working these until they are reassigned.
+                </div>
               </div>
             )}
             {d.gapDays.length > 0 && (

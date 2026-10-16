@@ -59,6 +59,35 @@ export interface DashboardData {
     fte_no_reports: number;
     currency_lines: { report_date: ISODate; account: string | null; line: string; sender: string | null }[];
   };
+  /**
+   * How much of the org the Brief could actually read, and why the rest is dark.
+   * Added 2026-10-16. Absent until n8n ships the new SELECT — render null-safe.
+   *
+   * These are separated on purpose. "A pod did not report" is a person's doing
+   * and the founder may act on it; "the pipeline could not attribute a message"
+   * is our defect and naming a person for it is a lie. On 15 Oct the old single
+   * line named six Team Leads as absent — three of them had reported every day
+   * and were invisible only because their registry record was split in two.
+   */
+  coverage?: {
+    /** Team Leads in the registry, whatever their pod. */
+    tl_total: number;
+    /** Team Leads who lead at least one VA pod — the denominator of the miss count. */
+    tl_with_pod: number;
+    /** Team Leads with no pod (specialist teams); they are not counted as missing. */
+    tl_without_pod: number;
+    /** …and how many of those still filed a report on the latest day. */
+    tl_without_pod_reported: number;
+    /** Claims in the last 30 days whose author could not be resolved. */
+    claims_unattributed_30d: number;
+    claims_total_30d: number;
+    /** Distinct Teams senders in the last 30 days that resolve to nobody. */
+    senders_unresolved_30d: number;
+    /** Registry rows holding half an identity (aad_id but no emp_id, or the reverse). */
+    half_records: number;
+    /** Open tickets whose owner has left the company. */
+    orphan_tickets: number;
+  };
   // Added 2026-10-01. Absent until n8n ships the new SELECTs — UI must render null-safe.
   org_census?: OrgCensusRow[];
   org_eodr_gaps?: OrgEodrGap[];
